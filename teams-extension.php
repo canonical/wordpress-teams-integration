@@ -43,7 +43,7 @@ class Auth_OpenID_TeamsExtension extends Auth_OpenID_Extension {
    * Get the string arguments that should be added to an OpenID
    * message for this extension.
    */
-  function getExtensionArgs() {
+  function getExtensionArgs($request = null) {
     $args = array();
 
     if ($this->_teams) {
@@ -58,7 +58,7 @@ class Auth_OpenID_TeamsExtension extends Auth_OpenID_Extension {
    *
    * Returns the message with the extension arguments added.
    */
-  function toMessage(&$message) {
+  function toMessage($message, $request = null) {
     if ($message->namespaces->addAlias($this->ns_uri, $this->ns_alias) === null) {
       if ($message->namespaces->getAlias($this->ns_uri) != $this->ns_alias) {
         return null;
@@ -122,7 +122,7 @@ class Auth_OpenID_TeamsRequest extends Auth_OpenID_TeamsExtension {
     $this->_teams = $teams;
   }
   
-  function Auth_OpenID_TeamsRequest($teams) {
+  public function __construct($teams) {
     $this->__init($teams);
   }
 }
@@ -158,7 +158,7 @@ class Auth_OpenID_TeamsResponse extends Auth_OpenID_TeamsExtension {
     }
   }
   
-  function Auth_OpenID_TeamsResponse(&$resp, $signed_only=true) {
+  public function __construct($resp, $signed_only=true) {
     $this->__init($resp, $signed_only);
   }
   
