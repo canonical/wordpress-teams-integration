@@ -20,24 +20,17 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Extracted version: ${VERSION}"
 
-      - name: Create distribution ZIP
+      - name: Prepare plugin directory
         run: |
-          TEMP_DIR=$(mktemp -d)
-          PLUGIN_DIR="${TEMP_DIR}/resource-centre"
+          mkdir -p dist/wordpress-teams-integration
+          rsync -a --exclude='.git' --exclude='.github' --exclude='README.md' --exclude='dist' . dist/wordpress-teams-integration/
 
-          mkdir -p "${PLUGIN_DIR}"
-          cp -r . "${PLUGIN_DIR}/"
-
-          cd "${TEMP_DIR}"
-          zip -r resource-centre-v${{ steps.version.outputs.version }}.zip resource-centre/ \
-            -x "resource-centre/.git/*" \
-               "resource-centre/.github/*" \
-               "resource-centre/README.md"
-
-          mv resource-centre-v${{ steps.version.outputs.version }}.zip ${{ github.workspace }}/
-
-      - name: Upload ZIP as artifact
+      - name: Upload plugin as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: resource-centre-v${{ steps.version.outputs.version }}
-          path: resource-centre-v${{ steps.version.outputs.version }}.zip
+          name: wordpress-teams-integration-v${{ steps.version.outputs.version }}.zip
+          path: dist/wordpress-teams-integration
+
+      - name: Output artifact URL
+        run: |
+          echo "Download artifact from: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
