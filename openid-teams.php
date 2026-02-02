@@ -38,7 +38,7 @@ add_action('wp_login', 'openid_teams_assign_on_login');
 function openid_teams_admin_panels() {
   // trusted servers page
   $hookname = add_options_page(__('OpenID teams', 'openid-teams'),
-                               __('OpenID Teams', 'openid-teams'), 8,
+                               __('OpenID Teams', 'openid-teams'), 'manage_options',
                                 'openid-teams', 'openid_teams_page' );
 }
 
@@ -51,8 +51,8 @@ function openid_teams_admin_panels() {
  */
 function openid_add_trust_map($team, $role, $server) {
   $list = openid_teams_get_trust_list();
-  $new_index = (sizeof($list) > 0) ? max(array_keys($list)) + 1 : 1;
-  $new_item = null;
+  $new_index = (count($list) > 0) ? max(array_keys($list)) + 1 : 1;
+  $new_item = new stdClass();
   $new_item->id = $new_index;
   $new_item->team = $team;
   $new_item->role = $role;
@@ -613,7 +613,7 @@ function openid_teams_assign_on_login($username, $password='') {
             $openid_assigned_roles[] = $role;
           }
         }
-        update_usermeta($user->ID, 'openid_assigned_roles', $openid_assigned_roles);
+        update_user_meta($user->ID, 'openid_assigned_roles', $openid_assigned_roles);
       }
   }
 }
@@ -625,13 +625,13 @@ function openid_teams_assign_on_login($username, $password='') {
  * @return object The amended $user object
  */
 function restore_old_roles($user) {
-  $old_roles = get_usermeta($user->ID, 'openid_assigned_roles');
+  $old_roles = get_user_meta($user->ID, 'openid_assigned_roles', true);
   if ($old_roles) {
     foreach ($old_roles as $role) {
       $user->remove_cap($role);
     }
   }
-  update_usermeta($user->ID, 'openid_assigned_roles', null);
+  update_user_meta($user->ID, 'openid_assigned_roles', null);
   return $user;
 }
 
