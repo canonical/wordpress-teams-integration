@@ -1,0 +1,43 @@
+name: Create Plugin Distribution
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from style.css
+        id: version
+        run: |
+          VERSION=$(grep "^Version:" style.css | sed 's/Version: *//')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Extracted version: ${VERSION}"
+
+      - name: Create distribution ZIP
+        run: |
+          TEMP_DIR=$(mktemp -d)
+          PLUGIN_DIR="${TEMP_DIR}/resource-centre"
+
+          mkdir -p "${PLUGIN_DIR}"
+          cp -r . "${PLUGIN_DIR}/"
+
+          cd "${TEMP_DIR}"
+          zip -r resource-centre-v${{ steps.version.outputs.version }}.zip resource-centre/ \
+            -x "resource-centre/.git/*" \
+               "resource-centre/.github/*" \
+               "resource-centre/README.md"
+
+          mv resource-centre-v${{ steps.version.outputs.version }}.zip ${{ github.workspace }}/
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: resource-centre-v${{ steps.version.outputs.version }}
+          path: resource-centre-v${{ steps.version.outputs.version }}.zip
